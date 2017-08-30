@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <link rel="stylesheet" href="dist/css/style.css">
+  <script src="dist/js/jquery-1.11.3.min.js"></script>
+  <script src="dist/js/md5.js"></script>
+  <title>点个赞</title>
+</head>
+
+<body>
+  <div>
+    <!-- --> http://106.38.39.50:8006/military/login.php
+    <br> 用户名：
+
+    <input id="username" type="text"><br> 密码：
+    <input id="password" type="text"><br>
+    <span id="login" class="good">登录</span>
+  </div>
+  <p><span id="good" class="good" onclick="goodplus('goodplus');">赞</span><span id="num" class="good num">2</span></p>
+
+  <script>
+    var flag = 0;
+
+    senddata();
+    // 按钮点击
+    function goodplus(goodplus) {
+      flag = 1;
+      if (checkCookie(goodplus) == true) {
+        senddata(goodplus); //通过Ajax修改页面上的数据
+      } else {
+        alert("你已经点过赞咯！")
+      }
+    }
+
+    // 加载数据
+    function senddata(goodplus) {
+      var data = flag == 1 ? 'favor_flag=1' : '';
+      $.ajax({
+        url: 'http://124.207.5.194:8006/military/favor_db.php', // http://192.168.20.251:8080/military/favor.php
+        dataType: 'json',
+        type: 'post',
+        data: data,
+        success: function(res){
+          $('#num').html(res.favor_count);
+          if(flag == 1) {
+            $('#good').addClass('clicked').html('👍');
+            setCookie(goodplus, goodplus, 365);
+          }
+          if(flag == 0 && checkCookie('goodplus') == false) {
+            $('#good').addClass('clicked').html('👍');
+          }
+        }
+      });
+    }
+
+    // 设置cookie
+    function setCookie(cname, cvalue, exdays) {
+      var d = new Date();
+      d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
+      var expires = "expires=" + d.toUTCString();
+      document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
+    }
+
+    // 获取cookie
+    function getCookie(cname) {
+      var name = cname + "=";
+      var ca = document.cookie.split(';');
+      for (var i = 0; i < ca.length; i++) {
+        var c = ca[i];
+        while (c.charAt(0) == ' ') {
+          c = c.substring(1);
+        }
+        if (c.indexOf(name) == 0) {
+          return c.substring(name.length, c.length);
+        }
+      }
+      return "";
+    }
+
+    // 检查cookie
+    function checkCookie(user) {
+      var thiscookie = user;
+      var mapcookie = getCookie(thiscookie)
+      if (mapcookie != "" && mapcookie != null) {
+        return false;
+      } else {
+        return true;
+      }
+    }
+
+    /**** login ****/
+
+    var st = $.md5('123456');
+    console.log(st);
+    var username = 'root';
+    var password = '123456';
+    // http://121.28.209.22:58280/loginUPK?method=login&username=root&password=e10adc3949ba59abbe56e057f20f883e&sysCode=AUDIO_GUIDE
+    // http://smartbus.jb.mil.cn:8080/loginUPK?method=login&username=root&password=e10adc3949ba59abbe56e057f20f883e&sysCode=AUDIO_GUIDE
+    $('#username').on('change', function() {
+      $('#username').val($('#username').val().replace(/\s+/g, ""));
+    });
+
+    $('#password').on('change', function() {
+      $('#password').val($('#password').val().replace(/\s+/g, ""));
+    });
+
+    $('#login').on('click', function() {
+      var uname = $('#username').val().replace(/\s+/g, "");
+      var pword = $.md5($('#password').val().replace(/\s+/g, ""));
+      console.log(pword, $('#password').val().replace(/\s+/g, ""));
+
+      $.ajax({
+        url: 'http://106.38.39.50:8006/military/login.php',
+        dataType: 'json',
+        type: 'post',
+        data: 'username='+uname+'&password='+pword,
+        // jsonpCallback:"success_jsonpCallback",
+        success: function(res) {
+          console.log(res);
+        },
+        error: function(err) {
+          console.log(err);
+        }
+      });
+    });
+  </script>
+</body>
+
+</html>
